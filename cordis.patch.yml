@@ -1,0 +1,8 @@
+# dsh-market-info bundle layer: one Host plugin row.
+# The Host half registers the /market-info panel routes, four model-facing tools
+# (ml_feed / ml_search / ml_read / ml_quotes) and the Client half adds the sidebar entry + panel.
+# dataDir/proxy/maxBytes can be overridden here; runtime settings.json wins.
+- insert:
+    - id: dsh-market-info
+      name: dsh-market-info
+      config: {}

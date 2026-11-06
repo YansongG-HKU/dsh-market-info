@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>市场资讯</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%230a6cff%22/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/market-info/ui/style.css" />
+</head>
+<body>
+  <header class="bar">
+    <div class="brand"><span class="dot"></span><strong>市场资讯</strong><span class="ver" id="version"></span></div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="feed" class="active">资讯流</button>
+      <button data-tab="quotes">行情</button>
+      <button data-tab="read">阅读</button>
+      <button data-tab="search">搜索</button>
+      <button data-tab="fav">收藏</button>
+      <button data-tab="settings">设置</button>
+    </nav>
+    <div class="cachehint" id="cachehint"></div>
+    <div class="ticker" id="tickerStrip" aria-label="行情"><div class="ticker-track" id="tickerTrack"></div></div>
+  </header>
+  <main>
+    <section id="tab-feed" class="tab active">
+      <div class="toolbar">
+        <button id="refreshFeed">刷新</button>
+        <input id="kwInput" type="text" placeholder="关键词过滤，逗号分隔（留空=全部）" />
+        <button id="applyKw">过滤</button>
+        <button id="clearKw">清空</button>
+        <select id="srcSelect" title="按来源过滤"><option value="">全部来源</option></select>
+        <span class="muted" id="feedStatus">加载中…</span>
+      </div>
+      <div class="chips" id="catChips"></div>
+      <ul class="list" id="feedList"></ul>
+    </section>
+
+    <section id="tab-quotes" class="tab">
+      <div class="toolbar">
+        <button id="refreshQuotes" class="primary">刷新行情</button>
+        <span class="muted" id="quoteStatus">加载中…</span>
+        <span class="spacer"></span>
+        <span class="muted" id="quotePolicy">批量单请求 · 60s 缓存 · 多源兜底</span>
+      </div>
+      <div class="chips" id="quoteSources"></div>
+      <div class="quotegrid" id="quoteGrid"></div>
+      <p class="muted quotenote">行情来自公开报价接口（TradingView / 腾讯 / Yahoo / CoinGecko），主源一次批量请求，失败才逐个兜底；默认 5 秒级刷新（设置可调 3–300 秒），页面隐藏暂停、失败自动降频，尽量不惊动对方风控。点任一卡片看分时/日线走势。</p>
+    </section>
+
+    <section id="tab-read" class="tab">
+      <div class="toolbar">
+        <input id="urlInput" type="url" placeholder="粘贴彭博文章 URL 或合作站文章 URL…" />
+        <button id="openUrl">打开</button>
+      </div>
+      <div id="readStatus" class="muted"></div>
+      <article id="article" class="article hidden"></article>
+      <div id="candidates" class="hidden">
+        <h3>候选副本</h3>
+        <ul class="list" id="candidateList"></ul>
+      </div>
+    </section>
+
+    <section id="tab-search" class="tab">
+      <div class="toolbar">
+        <input id="searchInput" type="text" placeholder="标题 / 关键词，例：Anthropic IPO" />
+        <button id="doSearch">搜索转载</button>
+      </div>
+      <div id="searchStatus" class="muted"></div>
+      <ul class="list" id="searchList"></ul>
+    </section>
+
+    <section id="tab-fav" class="tab">
+      <div class="toolbar"><span class="muted" id="favStatus"></span></div>
+      <ul class="list" id="favList"></ul>
+    </section>
+
+    <section id="tab-settings" class="tab">
+      <div class="card">
+        <h3>缓存（只存纯文本，有硬上限）</h3>
+        <pre class="kv" id="cacheInfo">读取中…</pre>
+        <button id="clearCache" class="danger">清空缓存</button>
+      </div>
+      <div class="card">
+        <h3>缓存上限</h3>
+        <label>磁盘上限 (MB) <input id="capMb" type="number" min="1" step="1" /></label>
+        <label>最多篇数 <input id="capItems" type="number" min="10" step="10" /></label>
+        <label>保留小时 <input id="capTtl" type="number" min="1" step="1" /></label>
+        <button id="saveCaps">保存上限</button>
+        <span class="muted" id="capsStatus"></span>
+      </div>
+      <div class="card wide">
+        <h3>关键词订阅</h3>
+        <label>逗号分隔，资讯流默认按它过滤 <input id="kwSettings" type="text" class="wide" /></label>
+        <button id="saveKw">保存关键词</button>
+        <span class="muted" id="kwStatus"></span>
+      </div>
+      <div class="card wide">
+        <h3>数据源（RSS / 新闻搜索 / JSON 接口，可混排）</h3>
+        <ul class="sources" id="feedSources"></ul>
+        <div class="inline">
+          <select id="newFeedType">
+            <option value="rss">RSS</option>
+            <option value="bing-news">Bing News 搜索</option>
+            <option value="google-news">Google News 搜索</option>
+            <option value="rsshub">RSSHub 路由</option>
+            <option value="wallstcn">华尔街见闻</option>
+            <option value="eastmoney">东方财富快讯</option>
+          </select>
+          <input id="newFeedName" type="text" placeholder="名称" />
+          <input id="newFeedUrl" type="text" placeholder="URL 或 搜索词" class="wide" />
+          <input id="newFeedCat" type="text" placeholder="分类" />
+          <button id="addFeed">添加</button>
+        </div>
+        <span class="muted" id="feedSourceStatus"></span>
+        <div class="inline" style="margin-top:10px">
+          <button id="resetFeeds">恢复默认源</button>
+          <button id="exportFeeds">导出源 JSON</button>
+          <button id="importFeeds">导入源 JSON</button>
+          <input id="feedsFile" type="file" accept=".json,application/json" class="hidden" />
+          <span class="muted" id="importStatus"></span>
+        </div>
+        <div class="inline" style="margin-top:10px">
+          <label class="muted">RSSHub 实例 <input id="rsshubBase" type="text" class="wide" /></label>
+          <button id="saveRsshub">保存 RSSHub</button>
+          <span class="muted" id="rsshubStatus"></span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>推荐数据源（一键添加）</h3>
+        <div class="chips" id="presetChips"></div>
+      </div>
+      <div class="card wide">
+        <h3>反爬 / 反封锁</h3>
+        <label><input type="checkbox" id="abEnabled" /> 启用请求伪装（浏览器头 + UA 轮换 + Cookie 罐）</label>
+        <label>重试次数 <input id="abRetries" type="number" min="0" max="5" step="1" /></label>
+        <label>每主机最小间隔 (ms) <input id="abInterval" type="number" min="0" max="10000" step="50" /></label>
+        <label><input type="checkbox" id="abAutoFallback" /> 源被拦时自动兜底（Bing News site:域名）</label>
+        <label>代理池（每行一个，http://host:port）<textarea id="abProxyPool" rows="3"></textarea></label>
+        <label>阅读代理（可选，如 https://r.jina.ai ；留空不用）<input id="abReaderProxy" type="text" class="wide" /></label>
+        <button id="saveAntiBlock">保存反爬设置</button><span class="muted" id="abStatus"></span>
+        <div class="inline" style="margin-top:12px">
+          <input id="netTestUrl" type="text" class="wide" placeholder="抓取诊断：粘贴 URL，测试状态 / 是否被拦 / 耗时" />
+          <button id="runNetTest">测试抓取</button>
+        </div>
+        <pre class="kv" id="netTestResult">（未测试）</pre>
+      </div>
+      <div class="card wide">
+        <h3>自选行情</h3>
+        <label>自动刷新间隔（秒，3–300，默认 5，10 秒内秒级刷新） <input id="quoteRefreshSec" type="number" min="3" max="300" step="1" /></label>
+        <button id="saveQuoteRefresh">保存刷新频率</button><span class="muted" id="quoteSettingsStatus"></span>
+        <ul class="sources watchlist" id="watchList"></ul>
+        <div class="inline">
+          <input id="newQuoteLabel" type="text" placeholder="名称，如 英伟达" />
+          <input id="newQuoteTv" type="text" placeholder="TradingView 代码，如 NASDAQ:NVDA" />
+          <input id="newQuoteYahoo" type="text" placeholder="Yahoo 代码（可选），如 NVDA" />
+          <input id="newQuoteTencent" type="text" placeholder="腾讯代码（可选），如 usNVDA" />
+          <button id="addQuote">添加自选</button>
+        </div>
+        <span class="muted" id="quoteAddStatus"></span>
+      </div>
+      <div class="card wide">
+        <h3>源健康度（进程内统计，重启清零）</h3>
+        <div class="inline"><button id="refreshHealth">刷新健康度</button><span class="muted" id="healthStatus"></span></div>
+        <div class="tablewrap"><table class="health"><thead><tr><th>源</th><th>类型</th><th>状态</th><th>成功率</th><th>平均</th><th>最近</th><th>最近错误</th></tr></thead><tbody id="healthBody"></tbody></table></div>
+      </div>
+      <div class="card">
+        <h3>研报 / 数据（付费墙外的替代入口）</h3>
+        <div class="linklist">
+          <a href="https://www.hibor.com.cn/" target="_blank" rel="noopener">慧博投研</a>
+          <a href="https://www.fxbaogao.com/" target="_blank" rel="noopener">发现报告</a>
+          <a href="https://rol.hanghangcha.com/" target="_blank" rel="noopener">萝卜投研</a>
+          <a href="https://data.eastmoney.com/report/" target="_blank" rel="noopener">东方财富研报</a>
+          <a href="https://www.sec.gov/edgar/search/" target="_blank" rel="noopener">SEC EDGAR</a>
+          <a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener">FRED</a>
+          <a href="https://www.bis.org/statistics/" target="_blank" rel="noopener">BIS 数据</a>
+          <a href="https://www.imf.org/en/Data" target="_blank" rel="noopener">IMF 数据</a>
+        </div>
+      </div>
+      <div class="card">
+        <h3>运行状态</h3>
+        <pre class="kv" id="statusInfo">读取中…</pre>
+      </div>
+    </section>
+  </main>
+  <div class="drawer hidden" id="quoteDetail" role="dialog" aria-modal="true" aria-label="行情图表">
+    <div class="drawer-backdrop" id="detailBackdrop"></div>
+    <div class="drawer-panel">
+      <button class="drawer-close" id="detailClose" aria-label="关闭图表">×</button>
+      <div class="detail-head">
+        <div class="detail-title"><span class="detail-label" id="detailLabel"></span><span class="detail-sym" id="detailSym"></span></div>
+        <div class="detail-nums"><span class="detail-price" id="detailPrice">—</span><span class="detail-chg" id="detailChg"></span></div>
+      </div>
+      <div class="detail-stats" id="detailStats"></div>
+      <div class="detail-ranges" id="detailRanges" role="group" aria-label="时间范围">
+        <button type="button" data-range="1d" class="active">1日</button>
+        <button type="button" data-range="5d">5日</button>
+        <button type="button" data-range="1mo">1月</button>
+        <button type="button" data-range="3mo">3月</button>
+        <button type="button" data-range="1y">1年</button>
+      </div>
+      <div class="detail-chartwrap" id="detailChartWrap">
+        <svg id="detailChart" viewBox="0 0 720 260" preserveAspectRatio="none" role="img" aria-label="价格走势图"></svg>
+        <div class="chart-tip hidden" id="chartTip"></div>
+        <div class="chart-empty hidden" id="chartEmpty">图表加载中…</div>
+      </div>
+      <div class="detail-foot"><span class="muted" id="detailSource"></span><button type="button" id="detailRefresh">刷新图表</button></div>
+    </div>
+  </div>
+  <script src="/market-info/ui/app.js"></script>
+</body>
+</html>

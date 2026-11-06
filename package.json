@@ -1,0 +1,63 @@
+{
+  "name": "dsh-market-info",
+  "version": "0.8.0",
+  "private": true,
+  "description": "市场资讯：19 源新闻聚合 + 全球行情 + 分时/日线走势图，本地轻量缓存，DSH 侧边栏面板",
+  "license": "MIT",
+  "author": "YansongG-HKU",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib",
+    "ui",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YansongG-HKU/dsh-market-info.git"
+  },
+  "homepage": "https://github.com/YansongG-HKU/dsh-market-info#readme",
+  "bugs": {
+    "url": "https://github.com/YansongG-HKU/dsh-market-info/issues"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "market",
+    "market-data",
+    "quotes",
+    "news",
+    "tradingview",
+    "reader"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-renderer"
+      ]
+    },
+    "manifestVersion": 1
+  },
+  "engines": {
+    "node": ">=22",
+    "dsh": ">=0.2.2-rc.1"
+  }
+}
