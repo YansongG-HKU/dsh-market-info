@@ -75,13 +75,50 @@ const harness = makeHostHarness()
 const dispose = apply(harness.ctx, { dataDir: path.join(tmpRoot, 'host') })
 const state = harness.state
 
-await test('host registers four tools + prompt section', () => {
-  assert.equal(state.tools.length, 4)
+await test('host registers eight tools + prompt section', () => {
+  assert.equal(state.tools.length, 8)
   const names = state.tools.map((t) => t.name).sort()
-  assert.deepEqual(names, ['ml_feed', 'ml_quotes', 'ml_read', 'ml_search'])
+  assert.deepEqual(names, ['ml_brief', 'ml_company', 'ml_feed', 'ml_filings', 'ml_macro', 'ml_quotes', 'ml_read', 'ml_search'])
   assert.equal(state.prompt && state.prompt.name, 'dsh-market-info')
   assert.ok(state.prompt && typeof state.prompt.text === 'function')
   assert.equal(state.prompt.order, 9200)
+})
+await test('ml_company tool resolves a company dossier', async () => {
+  const tool = state.tools.find((t) => t.name === 'ml_company')
+  const out = await tool.execute({ query: '600519', limit: 5 })
+  assert.equal(out.ok, true)
+  assert.equal(out.entity.code, '600519')
+  assert.ok(out.quote && typeof out.quote.price === 'number', 'quote price')
+  // Filing legs are live upstream calls; an empty result can mean the exchange is
+  // slow at that moment. Assert the shape, not the current count.
+  assert.ok(Array.isArray(out.filings), 'filings array')
+  assert.ok(Array.isArray(out.legs) && out.legs.length > 0, 'legs')
+  const filingLegs = (out.legs || []).filter((leg) => ['cninfo', 'sse', 'szse'].includes(leg.id))
+  if (out.filings.length === 0) {
+    const notes = filingLegs.map((leg) => leg.id + ':' + (leg.note || 'empty')).join(' ')
+    console.log('       (skip: no filings from upstream this run — ' + (notes || 'no filing leg') + ')')
+  }
+  assert.ok(out.finance && Array.isArray(out.finance.rows) && out.finance.rows.length > 5, 'finance rows')
+})
+await test('ml_filings tool returns official disclosures', async () => {
+  const tool = state.tools.find((t) => t.name === 'ml_filings')
+  const out = await tool.execute({ limit: 5, refresh: true })
+  assert.equal(out.ok, true)
+  assert.ok(Array.isArray(out.items), 'items array')
+  assert.ok(Array.isArray(out.sources) && out.sources.length > 0, 'sources reported')
+  if (out.items.length) {
+    assert.ok(out.items[0].title, 'title')
+    assert.ok(/^https?:/.test(out.items[0].url), 'absolute url: ' + out.items[0].url)
+    assert.ok(out.items[0].source, 'source label')
+  }
+})
+await test('ml_brief tool returns grouped digest', async () => {
+  const tool = state.tools.find((t) => t.name === 'ml_brief')
+  const out = await tool.execute({ limit: 40 })
+  assert.equal(out.ok, true)
+  assert.equal(typeof out.total, 'number')
+  assert.ok(out.groups && out.groups.filing, 'filing group present')
+  assert.equal(typeof out.newCount, 'number')
 })
 await test('host registers the panel route', () => {
   assert.ok(state.route, 'route registered')
@@ -124,7 +161,7 @@ await test('ml_quotes tool returns live market quotes', async () => {
 })
 await test('disposer tears everything down', () => {
   dispose()
-  assert.equal(state.disposed.length, 6, '4 tools + prompt + route, got ' + state.disposed.join(','))
+  assert.equal(state.disposed.length, 10, '8 tools + prompt + route, got ' + state.disposed.join(','))
 })
 
 // ---------- client half ----------

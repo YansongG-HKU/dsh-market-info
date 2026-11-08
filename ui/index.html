@@ -12,6 +12,9 @@
     <div class="brand"><span class="dot"></span><strong>市场资讯</strong><span class="ver" id="version"></span></div>
     <nav class="tabs" id="tabs">
       <button data-tab="feed" class="active">资讯流</button>
+      <button data-tab="dash">总览</button>
+      <button data-tab="official">官方</button>
+      <button data-tab="company">公司</button>
       <button data-tab="quotes">行情</button>
       <button data-tab="read">阅读</button>
       <button data-tab="search">搜索</button>
@@ -22,6 +25,15 @@
     <div class="ticker" id="tickerStrip" aria-label="行情"><div class="ticker-track" id="tickerTrack"></div></div>
   </header>
   <main>
+    <section id="tab-dash" class="tab">
+      <div class="toolbar">
+        <button id="refreshDash">刷新</button>
+        <span class="muted" id="dashStatus">加载中…</span>
+      </div>
+      <div class="kpis" id="dashKpis"></div>
+      <div class="dash-grid" id="dashGrid"></div>
+      <div class="card wide" id="flowBoardCard" style="margin-top:12px"></div>
+    </section>
     <section id="tab-feed" class="tab active">
       <div class="toolbar">
         <button id="refreshFeed">刷新</button>
@@ -33,6 +45,35 @@
       </div>
       <div class="chips" id="catChips"></div>
       <ul class="list" id="feedList"></ul>
+    </section>
+
+    <section id="tab-official" class="tab">
+      <div class="toolbar">
+        <button id="refreshOfficial" class="primary">刷新</button>
+        <input id="officialQ" type="text" placeholder="全文检索：公司名 / 代码 / 关键词（如 回购、10-K、FOMC）" />
+        <button id="officialSearch">搜索</button>
+        <span class="muted" id="officialStatus">加载中…</span>
+      </div>
+      <div class="briefbar" id="briefBar"></div>
+      <div class="chips" id="officialDomains"></div>
+      <div class="chips" id="officialCats"></div>
+      <div class="chips" id="officialRegions"></div>
+      <div class="chips" id="officialTiers"></div>
+      <ul class="list" id="officialList"></ul>
+    </section>
+
+    <section id="tab-company" class="tab">
+      <div class="toolbar">
+        <input id="companyQ" type="text" placeholder="公司名 / 拼音 / 代码：贵州茅台、600519、腾讯、AAPL" />
+        <button id="companySearch" class="primary">查询</button>
+        <button id="companyRefresh" title="跳过行情缓存重新查询">刷新</button>
+        <span class="muted" id="companyStatus"></span>
+      </div>
+      <div class="chips" id="companyPresets"></div>
+      <div class="chips" id="companyCandidates"></div>
+      <div id="companyBody" class="company-body">
+        <p class="co-hint">输入公司名、拼音或代码，聚合行情、财务指标、官方公告与卖方研报。</p>
+      </div>
     </section>
 
     <section id="tab-quotes" class="tab">
@@ -162,6 +203,22 @@
         <h3>源健康度（进程内统计，重启清零）</h3>
         <div class="inline"><button id="refreshHealth">刷新健康度</button><span class="muted" id="healthStatus"></span></div>
         <div class="tablewrap"><table class="health"><thead><tr><th>源</th><th>类型</th><th>状态</th><th>成功率</th><th>平均</th><th>最近</th><th>最近错误</th></tr></thead><tbody id="healthBody"></tbody></table></div>
+      </div>
+      <div class="card wide">
+        <h3>数据源分级（按实测更新节奏）</h3>
+        <div class="inline">
+          <button id="refreshCadence">刷新分级</button>
+          <span class="muted" id="cadenceSummary">读取中…</span>
+        </div>
+        <div id="cadenceGrid" class="cadence-grid"></div>
+      </div>
+      <div class="card wide">
+        <h3>官方源健康度与延迟（披露 / 宏观 / 政策 / 资金流）</h3>
+        <div class="inline">
+          <button id="refreshSourceHealth">刷新</button>
+          <span class="muted" id="sourceHealthSummary">读取中…</span>
+        </div>
+        <div class="tablewrap"><table class="health"><thead><tr><th>源</th><th>类别</th><th>档位</th><th>状态</th><th>成功</th><th>p50</th><th>p95</th><th>趋势</th><th>新鲜度</th><th>最近错误</th></tr></thead><tbody id="sourceHealthBody"></tbody></table></div>
       </div>
       <div class="card">
         <h3>研报 / 数据（付费墙外的替代入口）</h3>

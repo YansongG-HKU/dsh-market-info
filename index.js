@@ -16,12 +16,16 @@ export const inject = ['agents']
 export const name = 'dsh-market-info'
 
 const PROMPT_TEXT =
-  '市场资讯面板（dsh-market-info）已启用：ml_feed 拉取 19 个新闻源头条（Reuters / Bloomberg / CNBC / WSJ / FT / BBC / 华尔街见闻 / 东方财富 / 36氪 / Google News 等，' +
-  '可按关键词、分类、来源过滤），ml_search 搜索转载候选，' +
-  '设置页有源健康度/延迟统计、数据源 JSON 导入导出、Google News 与 RSSHub 支持、反爬/反封锁设置（UA 轮换、重试、代理池、源兜底、抓取诊断），' +
-  'ml_read 把任意新闻/彭博文章 URL 转成可读全文（走授权转载副本，纯文本、带严格缓存上限），' +
-  'ml_quotes 取行情（TradingView 批量主源 + 腾讯/Yahoo/CoinGecko 兜底，5 秒级刷新、失败自动降频）；点开任一标的看分时/日线走势（Eastmoney/OKX/Yahoo 历史）。' +
-  '侧边栏「市场资讯」面板提供资讯流/行情/阅读/搜索/收藏/设置，行情条常驻顶部。'
+  '市场资讯面板（dsh-market-info）已启用，两套数据面：' +
+  '【官方事实面】ml_filings 查官方披露与公告全文检索（巨潮/上交所/深交所/HKEXnews/SEC EDGAR 全文与 XBRL），' +
+  'ml_macro 取宏观与政策发布（Fed/ECB/BLS/FRED/美财政部/央行/统计局/海关/外管局/CFETS）以及资金与结构数据（CFTC 持仓/Cboe 波动率/OFAC 制裁/沪深港通十大成交/两融余额/龙虎榜/行业与概念板块轮动），' +
+  'ml_brief 一次拿到「发生了什么」的分类摘要并标出相对上一次的新增条数，' +
+  'ml_company 是公司档案：名称/拼音/代码 → 行情 + 财务指标 + 官方公告 + 卖方研报 + 同行业可比公司；' +
+  '这套是主源，比二手新闻早且不失真，判断「公司被官方确认了什么」「资金在往哪轮动」先走它。' +
+  '【资讯与行情面】ml_feed 拉取 19 个新闻源头条（可按关键词/分类/来源过滤），ml_read 把新闻 URL 转成可读全文（走授权转载副本），' +
+  'ml_quotes 取行情（TradingView 批量主源 + 腾讯/Yahoo/CoinGecko 兜底，5 秒级刷新、失败自动降频）。' +
+  '侧边栏「市场资讯」面板提供资讯流/官方/公司/行情/阅读/搜索/收藏/设置，行情条常驻顶部，源健康度与延迟统计在设置页。' +
+  '口径：只走公开/官方/授权渠道；输出是中性的可核验事实与来源链接，不构成投资建议。'
 
 export function apply(ctx, config) {
   const log = {

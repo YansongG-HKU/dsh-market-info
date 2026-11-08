@@ -14,3 +14,4 @@ Thumbs.db
 # test & build artifacts
 coverage/
 .artifacts/
+_scratch/
