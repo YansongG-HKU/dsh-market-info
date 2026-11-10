@@ -3,6 +3,10 @@
 All notable changes to `dsh-market-info` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.10.1] — 2026-11-10
+
+- Concurrent news refreshes share the same upstream fetch under the same settings, with filtering applied per caller. Settings updates and feed imports invalidate the cached data and prevent older refreshes from replacing it. A loopback RSS test verifies one upstream request for eight concurrent callers. See [#5](https://github.com/YansongG-HKU/dsh-market-info/issues/5).
+
 ## [1.10.0] — 2026-11-08
 
 ### Added — 资金面四联（只读视图，新序列 1 条）
