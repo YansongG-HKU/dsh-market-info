@@ -3,6 +3,10 @@
 All notable changes to `dsh-market-info` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.10.2] — 2026-11-12
+
+- 行情和历史缓存按设置隔离，旧请求不回填新缓存，旧熔断在配置变更后重置。同一配置和时间窗口的历史请求共享一次抓取。[Issue #6](https://github.com/YansongG-HKU/dsh-market-info/issues/6)
+
 ## [1.10.1] — 2026-11-10
 
 - Concurrent news refreshes share the same upstream fetch under the same settings, with filtering applied per caller. Settings updates and feed imports invalidate the cached data and prevent older refreshes from replacing it. A loopback RSS test verifies one upstream request for eight concurrent callers. See [#5](https://github.com/YansongG-HKU/dsh-market-info/issues/5).
