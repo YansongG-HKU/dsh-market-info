@@ -3,6 +3,10 @@
 All notable changes to `dsh-market-info` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.10.3] — 2026-11-15
+
+- Align with DeepSeek Harness 0.2.2-rc.3: `engines.dsh` raised to `>=0.2.2-rc.3`; the client slot contract and the host tools / systemPrompt / webServer interfaces are unchanged. 29/29 tests pass.
+
 ## [1.10.2] — 2026-11-12
 
 - 行情和历史缓存按设置隔离，旧请求不回填新缓存，旧熔断在配置变更后重置。同一配置和时间窗口的历史请求共享一次抓取。[Issue #6](https://github.com/YansongG-HKU/dsh-market-info/issues/6)
