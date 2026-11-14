@@ -6,6 +6,9 @@
   "license": "MIT",
   "author": "YansongG-HKU",
   "type": "module",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
   "main": "index.js",
   "exports": {
     ".": "./index.js",
